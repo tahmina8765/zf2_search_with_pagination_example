@@ -1,0 +1,85 @@
+<?php
+$title = 'Album';
+$this->headTitle($title);
+$url_order = 'ASC';
+if ($order_by == 'artist') { $url_order = ($order == 'ASC' )? 'DESC' : 'ASC';}
+ elseif ($order_by == 'title') { $url_order = ($order == 'ASC' )? 'DESC' : 'ASC';}
+
+?>
+<h1><?php echo $this->escapeHtml($title); ?></h1>
+<p>
+    <a href="<?php echo $this->url('album', array('action'=>'add'));?>">Add new album</a>
+</p>
+
+
+<?php
+$form  = $this->form;
+$form->setAttribute('action', $this->url('album', array('action' => 'search')));
+$form->prepare();
+
+echo $this->form()->openTag($form);
+foreach ($form as $element) :
+    ?>
+    <div class="control-group <?php if ($this->formElementErrors($element)) echo "error" ?>">
+        <label class="control-label"><?php echo $element->getLabel() ?></label>
+        <div class="controls">
+            <?php
+            echo $this->formElement($element);
+            if ($this->formElementErrors($element)):
+                ?>
+                <span class="help-inline"><?php echo $this->formElementErrors($element); ?></span>
+                <?php
+            endif;
+            ?>
+        </div>
+    </div>
+    <?php
+endforeach;
+echo $this->form()->closeTag();
+?>
+
+<table class="table">
+    <thead>
+    <tr>
+    <th><a href="<?php echo $this->url('album', array('order_by' => 'artist', 'order' => $url_order, 'search_by' => $search_by)); ?>">Artist <?php if ($order_by == 'artist'): ?><i class="icon-chevron-<?php echo $url_order == 'ASC' ? 'down' : 'up' ?>"></i><?php endif; ?></a>
+        </th>
+<th><a href="<?php echo $this->url('album', array('order_by' => 'title', 'order' => $url_order, 'search_by' => $search_by)); ?>">Title <?php if ($order_by == 'title'): ?><i class="icon-chevron-<?php echo $url_order == 'ASC' ? 'down' : 'up' ?>"></i><?php endif; ?></a>
+        </th>
+<th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+<?php foreach ($paginator as $row) : ?>
+        <tr>
+        <td><?php echo $this->escapeHtml($row->artist);?></td>
+		<td><?php echo $this->escapeHtml($row->title);?></td>
+		
+    <td>
+        <a href="<?php echo $this->url('album', array('action'=>'edit', 'id' => $row->id));?>" class="btn btn-primary btn-mini edit-row">Edit</a>
+            <?php
+                    $delurl = $this->url('album', array (
+                        'action' => 'delete',
+                        'id'     => $row->id,
+                    ));
+                    ?>
+                    <div style="display: none;">
+                        <form action="<?php echo $delurl; ?>" method="post" id="post_<?php echo $row->id; ?>" name="post_<?php echo $row->id; ?>">
+                            <input type="hidden" name="id" value="<?php echo (int) $row->id; ?>" />
+                        </form>
+                    </div>
+                    <a onclick="if (confirm('Are you sure you want to delete <?php echo $row->id; ?>?')) {document.<?php echo "post_" . $row->id; ?>.submit();} event.returnValue = false; return false;" href="#" class="btn btn-primary btn-mini edit-row">Delete</a>
+
+    </td>
+    
+        </tr>
+<?php endforeach; ?>
+    </tbody>
+</table>
+
+
+<?php
+    echo $this->paginationControl(
+            $paginator, 'Sliding', 'paginator-slide', array('order_by' => $order_by, 'order' => $order, 'search_by' => $search_by, 'pageAction' => $pageAction)
+    );
+    ?>
+
